@@ -55,6 +55,31 @@ class CollectdInfluxdbOutputTest < Test::Unit::TestCase
     assert_equal "test_tag.host.plugin.plugin_instance.type", d.emits[3][0]
   end
 
+  def test_use_timestamp
+    d = create_driver %[
+      type collectd_influxdb
+    ]
+    
+    d.run do
+      d.emit([{
+        "time" => 1000, "host" => 'host', "interval" => 5,
+        "plugin" => 'plugin', "plugin_instance" => 'plugin_instance',
+        "type" => 'type', "type_instance" => 'type_instance',
+        "values" => ['v1', 'v2'], "dsnames" => ['n1', 'n2'], "dstypes" => ['t1', 't2']
+      }])
+      d.emit([{
+        "time" => 9999, "host" => 'host', "interval" => 5,
+        "plugin" => 'plugin', "plugin_instance" => '',
+        "type" => 'type', "type_instance" => 'type_instance',
+        "values" => ['v1', 'v2'], "dsnames" => ['n1', 'n2'], "dstypes" => ['t1', 't2']
+      }])
+    end
+    
+    assert_equal 2, d.emits.length
+    assert_equal 1000, d.emits[0][1]
+    assert_equal 9999, d.emits[1][1]
+  end
+
   def test_normalize_record
     d = create_driver %[
       type collectd_influxdb
