@@ -1,4 +1,4 @@
-# Output filter plugin Output filter plugin to rewrite Collectd JSON output to be inserted into InfluxDB
+# Output filter plugin to rewrite Collectd JSON output to be inserted into InfluxDB
 
 Rewrites the message coming from Collectd to make it compatible with the way InfluxDB stores data in series.
 
