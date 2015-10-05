@@ -1,37 +1,56 @@
 module Fluent
-  class CollectdInfluxdbOutput < Output
-    Fluent::Plugin.register_output('collectd_influxdb', self)
+  class CollectdUnrollOutput < Output
+    Fluent::Plugin.register_output('collectd_unroll', self)
 
-    def configure(conf)
-      super
-    end
+    config_param :remove_tag_prefix,  :string, :default => nil
+    config_param :add_tag_prefix,     :string, :default => nil
+
 
     def emit(tag, es, chain)
+      tag = update_tag(tag)
       es.each { |time, record|
-        record.each { |event|
-          Engine.emit(rewrite_tag(tag, event), event['time'], normalize_record(event))
-        }
+        Engine.emit(tag, time, normalize_record(record))
       }
 
       chain.next
     end
 
-    private
 
-    def rewrite_tag(tag, event)
-      @tags = [tag, event['host'].gsub(".","/"), event['plugin'], event['plugin_instance'], event['type'], event['type_instance']]
-      tag = @tags.join(".").squeeze(".").gsub(/\.$/, '')
-      tag
+    def update_tag(tag)
+      if remove_tag_prefix
+        if remove_tag_prefix == tag
+          tag = ''
+        elsif tag.to_s.start_with?(remove_tag_prefix+'.')
+          tag = tag[remove_tag_prefix.length+1 .. -1]
+        end
+      end
+      if add_tag_prefix
+        tag = tag && tag.length > 0 ? "#{add_tag_prefix}.#{tag}" : add_tag_prefix
+      end
+      return tag
     end
 
+    private
+
     def normalize_record(record)
+      if record.nil?
+        return record
+      end
+      if !(record.has_key?('values')) || !(record.has_key?('dsnames')) || !(record.has_key?('dstypes')) || !(record.has_key?('host')) || !(record.has_key?('plugin')) || !(record.has_key?('plugin_instance')) || !(record.has_key?('type')) || !(record.has_key?('type_instance'))
+        return record
+      end
+      
       record['values'].each_with_index { |value, index|
+        @tags = [record['host'].gsub(".","/"), record['plugin'], record['plugin_instance'], record['type'], record['type_instance'], record['dsnames'][index]]
+        tag = @tags.join(".").squeeze(".").gsub(/\.$/, '')
+        record[tag] = value
         record[record['dsnames'][index]] = value
+        record['dstype_' + record['dsnames'][index]] = record['dstypes'][index]
+        record['dstype'] = record['dstypes'][index]
       }
-      keys = ['time', 'host', 'interval', 'plugin', 'plugin_instance', 'type', 'type_instance', 'values', 'dsnames', 'dstypes']
-      keys.each { |key|
-        record.delete(key)
-      }
+      record.delete('dstypes')
+      record.delete('dsnames')
+      record.delete('values')
       record
     end
   end
