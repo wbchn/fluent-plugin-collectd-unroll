@@ -3,12 +3,12 @@ $:.push File.expand_path('../lib', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.name        = "fluent-plugin-collectd-influxdb"
-  gem.description = "Output filter plugin to rewrite Collectd JSON output to be inserted into InfluxDB"
-  gem.homepage    = "https://github.com/giannello/fluent-plugin-collectd-influxdb"
+  gem.description = "Output filter plugin to rewrite Collectd JSON output to flat json"
+  gem.homepage    = "https://github.com/giannello/fluent-plugin-collectd-unroll"
   gem.summary     = gem.description
   gem.version     = File.read("VERSION").strip
-  gem.authors     = ["Giuseppe Iannello"]
-  gem.email       = "giuseppe.iannello@brokenloop.net"
+  gem.authors     = ["Manoj Sharma"]
+  gem.email       = "vigyanik@gmail.com"
   gem.has_rdoc    = false
   #gem.platform    = Gem::Platform::RUBY
   gem.license     = 'MIT'
