@@ -1,24 +1,24 @@
 require 'fluent/test'
-require 'fluent/plugin/out_collectd_influxdb'
+require 'fluent/plugin/out_collectd_unroll'
 
 
-class CollectdInfluxdbOutputTest < Test::Unit::TestCase
+class CollectdUnrollOutputTest < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
   end
 
   CONFIG = %[
-    type collectd_influxdb
+    type collectd_unroll
     tag foo.filtered
   ]
 
   def create_driver(conf = CONFIG)
-    Fluent::Test::OutputTestDriver.new(Fluent::CollectdInfluxdbOutput, tag='test_tag').configure(conf)
+    Fluent::Test::OutputTestDriver.new(Fluent::CollectdUnrollOutput, tag='test_tag').configure(conf)
   end
 
   def test_rewrite_tag
     d = create_driver %[
-      type collectd_influxdb
+      type collectd_unroll
     ]
 
     d.run do
@@ -57,7 +57,7 @@ class CollectdInfluxdbOutputTest < Test::Unit::TestCase
 
   def test_use_timestamp
     d = create_driver %[
-      type collectd_influxdb
+      type collectd_unroll
     ]
     
     d.run do
@@ -82,7 +82,7 @@ class CollectdInfluxdbOutputTest < Test::Unit::TestCase
 
   def test_normalize_record
     d = create_driver %[
-      type collectd_influxdb
+      type collectd_unroll
     ]
 
     d.run do
@@ -94,7 +94,7 @@ class CollectdInfluxdbOutputTest < Test::Unit::TestCase
       }])
     end
 
-    assert_equal [{"n1"=>"v1", "n2"=>"v2"}], d.records
+    assert_equal ({'n1'=>'v1','n2'=>'v2'} - d.records[0]).empty?, true
   end
 
 end
