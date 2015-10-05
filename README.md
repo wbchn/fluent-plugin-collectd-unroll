@@ -1,4 +1,4 @@
-# Output filter plugin to rewrite Collectd JSON output to be inserted into InfluxDB
+# Output filter plugin to rewrite Collectd JSON output to unroll into a flat json
 
 Rewrites the message coming from Collectd to store as a flat json. Can be used in Elasticsearch to display metrics.
 
