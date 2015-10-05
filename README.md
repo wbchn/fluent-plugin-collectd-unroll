@@ -1,17 +1,17 @@
 # Output filter plugin to rewrite Collectd JSON output to be inserted into InfluxDB
 
-Rewrites the message coming from Collectd to make it compatible with the way InfluxDB stores data in series.
+Rewrites the message coming from Collectd to store as a flat json. Can be used in Elasticsearch to display metrics.
 
 ## Installation
 
 Use RubyGems:
 
-    gem install fluent-plugin-collectd-influxdb
+    gem install fluent-plugin-collectd-unroll
 
 ## Configuration
 
     <match pattern>
-      type collectd_influxdb
+      type collectd_unroll
     </match>
 
 If following record is passed:
@@ -44,7 +44,7 @@ Empty values in "plugin", "plugin_instance", "type" or "type_instance" will not 
 
 <table>
   <tr>
-    <td>Author</td><td>Giuseppe Iannello <giuseppe.iannello@brokenloop.net></td>
+    <td>Author</td><td>Manoj Sharma <vigyanik@gmail.com></td>
   </tr>
   <tr>
     <td>License</td><td>MIT License</td>
