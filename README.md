@@ -6,9 +6,11 @@ Rewrites the message coming from Collectd to store as a flat json. Can be used i
 
 Use RubyGems:
 If you use td-agent
+
     td-agent-gem install fluent-plugin-collectd-unroll
 
 If you use fluentd
+
     gem install fluent-plugin-collectd-unroll
 
 ## Configuration
