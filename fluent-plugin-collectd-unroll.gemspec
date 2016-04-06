@@ -4,7 +4,7 @@ $:.push File.expand_path('../lib', __FILE__)
 Gem::Specification.new do |gem|
   gem.name        = "fluent-plugin-collectd-unroll"
   gem.description = "Output filter plugin to rewrite Collectd JSON output to flat json"
-  gem.homepage    = "https://github.com/giannello/fluent-plugin-collectd-unroll"
+  gem.homepage    = "https://github.com/CiscoZeus/fluent-plugin-collectd-unroll"
   gem.summary     = gem.description
   gem.version     = File.read("VERSION").strip
   gem.authors     = ["Manoj Sharma"]
