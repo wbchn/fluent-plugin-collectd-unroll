@@ -4,6 +4,8 @@ module Fluent
   class Plugin::CollectdUnrollOutput < Plugin::Output
     Fluent::Plugin.register_output('collectd_unroll', self)
 
+    helpers :event_emitter
+
     config_param :tag, :string,
                   desc: "The output record tag name."
 

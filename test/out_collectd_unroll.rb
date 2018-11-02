@@ -32,7 +32,7 @@ class CollectdUnrollOutputTest < Test::Unit::TestCase
       })
     end
 
-    assert_equal 3, d.emits.length
+    assert_equal 1, d.emits.length
     assert_equal "test_tag", d.emits[0][0]
   end
 
