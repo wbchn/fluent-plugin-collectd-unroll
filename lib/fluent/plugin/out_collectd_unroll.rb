@@ -1,33 +1,28 @@
+require 'fluent/plugin/output'
+
 module Fluent
-  class CollectdUnrollOutput < Output
+  class Plugin::CollectdUnrollOutput < Plugin::Output
     Fluent::Plugin.register_output('collectd_unroll', self)
 
-    config_param :remove_tag_prefix,  :string, :default => nil
-    config_param :add_tag_prefix,     :string, :default => nil
+    config_param :tag, :string,
+                  desc: "The output record tag name."
 
-
-    def emit(tag, es, chain)
-      tag = update_tag(tag)
-      es.each { |time, record|
-        Engine.emit(tag, time, normalize_record(record))
-      }
-
-      chain.next
+    def initialize
+      super
     end
 
+    def configure(conf)
+      super
+    end
+    
+    def process(tag, es)
+      stream = MultiEventStream.new
+      es.each { |time, record|
+        record = inject_values_to_record(tag, time, record)
+        stream.add(time, normalize_record(record))
+      }
 
-    def update_tag(tag)
-      if remove_tag_prefix
-        if remove_tag_prefix == tag
-          tag = ''
-        elsif tag.to_s.start_with?(remove_tag_prefix+'.')
-          tag = tag[remove_tag_prefix.length+1 .. -1]
-        end
-      end
-      if add_tag_prefix
-        tag = tag && tag.length > 0 ? "#{add_tag_prefix}.#{tag}" : add_tag_prefix
-      end
-      return tag
+      router.emit_stream(@tag, stream)
     end
 
     private
@@ -40,14 +35,25 @@ module Fluent
         return record
       end
       
-      record['values'].each_with_index { |value, index|
-        @tags = [record['host'].gsub(".","/"), record['plugin'], record['plugin_instance'], record['type'], record['type_instance'], record['dsnames'][index]]
-        tag = @tags.join(".").squeeze(".").gsub(/\.$/, '')
-        record[tag] = value
-        record[record['dsnames'][index]] = value
-        record['dstype_' + record['dsnames'][index]] = record['dstypes'][index]
-        record['dstype'] = record['dstypes'][index]
-      }
+      # record['values'].each_with_index { |value, index|
+      #   record[tag] = value
+      #   record[record['dsnames'][index]] = value
+      #   record['dstype_' + record['dsnames'][index]] = record['dstypes'][index]
+      #   record['dstype'] = record['dstypes'][index]
+      # }
+
+      rec_plugin = record['plugin']
+      rec_type = record['type']
+      record[rec_plugin] = {rec_type => {}}
+      if record['dsnames'].length == 1
+        record[rec_plugin][rec_type] = record['values'].first
+      else
+        record['values'].each_with_index { |value, index|
+          record[rec_plugin][rec_type][record['dsnames'][index]] = value
+        }
+        record['dstypes'] = record['dstypes'].uniq
+      end
+
       record.delete('dstypes')
       record.delete('dsnames')
       record.delete('values')
